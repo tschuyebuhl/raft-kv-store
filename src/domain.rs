@@ -1,5 +1,5 @@
 use bincode::config;
-use rusqlite::types::{FromSql, FromSqlError, FromSqlResult, ToSql, ToSqlOutput, Value, ValueRef};
+use rusqlite::types::{FromSql, FromSqlError, FromSqlResult, ToSql, ToSqlOutput, ValueRef};
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -21,11 +21,12 @@ impl From<raft::eraftpb::HardState> for HardState {
 
 impl From<HardState> for raft::eraftpb::HardState {
     fn from(hs: HardState) -> Self {
-        let mut pb = raft::eraftpb::HardState::default();
-        pb.term = hs.term;
-        pb.vote = hs.vote;
-        pb.commit = hs.commit_index;
-        pb
+        raft::eraftpb::HardState {
+            term: hs.term,
+            vote: hs.vote,
+            commit: hs.commit_index,
+            ..Default::default()
+        }
     }
 }
 
@@ -158,7 +159,7 @@ impl From<EntryType> for raft::prelude::EntryType {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct Entry {
+pub struct DbEntry {
     pub entry_type: EntryType,
     pub term: u64,
     pub index: u64,
@@ -166,8 +167,8 @@ pub struct Entry {
     pub context: Vec<u8>,
 }
 
-impl From<Entry> for raft::prelude::Entry {
-    fn from(e: Entry) -> Self {
+impl From<DbEntry> for raft::prelude::Entry {
+    fn from(e: DbEntry) -> Self {
         raft::prelude::Entry {
             entry_type: e.entry_type.into(),
             term: e.term,
@@ -201,17 +202,17 @@ impl ToSql for EntryType {
     }
 }
 
-impl FromSql for Entry {
+impl FromSql for DbEntry {
     fn column_result(value: ValueRef<'_>) -> FromSqlResult<Self> {
         let bytes = value.as_blob()?;
         let cfg = config::standard();
-        let (val, _len): (Entry, usize) = bincode::serde::decode_from_slice(bytes, cfg)
+        let (val, _len): (DbEntry, usize) = bincode::serde::decode_from_slice(bytes, cfg)
             .map_err(|e| FromSqlError::Other(Box::new(e)))?;
         Ok(val)
     }
 }
 
-impl ToSql for Entry {
+impl ToSql for DbEntry {
     fn to_sql(&self) -> rusqlite::Result<ToSqlOutput<'_>> {
         let cfg = config::standard();
         let bytes = bincode::serde::encode_to_vec(self, cfg)
