@@ -2,6 +2,8 @@
 name = "raft-kv-store"
 version = "0.1.0"
 edition = "2024"
+description = "Opinionated Raft KV store"
+license = "Apache-2.0"
 
 [dependencies]
 bincode = { version = "2.0.1", features = ["serde"] }
