@@ -1,0 +1,20 @@
+node_id = 3
+bind_addr = "127.0.0.1:7103"
+storage_path = "data/node3.sqlite"
+http_addr = "127.0.0.1:7203"
+linearizable = true
+heartbeat_tick = 2
+election_tick = 10
+tick_interval_ms = 200
+
+[[peers]]
+id = 1
+addr = "127.0.0.1:7101"
+
+[[peers]]
+id = 2
+addr = "127.0.0.1:7102"
+
+[[peers]]
+id = 3
+addr = "127.0.0.1:7103"
