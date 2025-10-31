@@ -1,0 +1,10 @@
+[package]
+name = "raft-kv-store"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+bincode = { version = "2.0.1", features = ["serde"] }
+raft = "0.7.0"
+rusqlite = { version = "0.37.0", features = ["blob", "bundled"] }
+serde = { version = "1.0.228", features = ["derive"] }
